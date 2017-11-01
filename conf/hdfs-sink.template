@@ -1,0 +1,85 @@
+name=${SERVICE_NAME}
+connector.class=io.confluent.connect.hdfs.HdfsSinkConnector
+tasks.max=${TASKS}
+topics=${TOPICS}
+
+### HDFS ###
+# The HDFS connection URL. This configuration has the format of hdfs:://hostname:port and specifies the HDFS to export data to.
+hdfs.url=${HDFS_SERVICE}
+# The Hadoop configuration directory.
+hadoop.conf.dir=/opt/docker/conf/hadoop-conf
+# Top level HDFS directory to store the data ingested from Kafka.
+topics.dir=${HDFS_PATH}
+# Top level HDFS directory to store the write ahead logs.
+logs.dir=${HDFS_LOGS_PATH}
+# The format class to use when writing data to HDFS.
+format.class=io.confluent.connect.hdfs.avro.AvroFormat
+
+### Hive ###
+# Configuration indicating whether to integrate with Hive when running the connector.
+hive.integration=${HIVE_INTEGRATION}
+# The Hive metastore URIs, can be IP address or fully-qualified domain name and port of the metastore host.
+#hive.metastore.uris=${HIVE_SERVICE}
+# Hive configuration directory.
+hive.conf.dir=/opt/docker/conf/hive-conf
+# Hive home directory.
+#hive.home=
+# The database to use when the connector creates tables in Hive.
+hive.database=${HIVE_DATABASE}
+
+### Security ###
+# Configuration indicating whether HDFS is using Kerberos for authentication.
+hdfs.authentication.kerberos=${KERBEROS_AUTH}
+# The principal to use when HDFS is using Kerberos to for authentication.
+connect.hdfs.principal=${KERBEROS_PRINCIPAL}
+# The path to the keytab file for the HDFS connector principal. This keytab file should only be readable by the connector user.
+connect.hdfs.keytab=${KERBEROS_KEYTAB}
+# The principal for HDFS Namenode.
+hdfs.namenode.principal=${KERBEROS_HDFS_PRINCIPAL}
+# The period in milliseconds to renew the Kerberos ticket.
+kerberos.ticket.renew.period.ms=${KERBEROS_TICKET_RENEW}
+
+### Schema ###
+# The schema compatibility rule to use when the connector is observing schema changes. The supported configurations are NONE, BACKWARD, FORWARD and FULL.
+schema.compatibility=${SCHEMA_COMPAT}
+# The size of the schema cache used in the Avro converter.
+schema.cache.size=${SCHEMA_CACHE}
+
+### Connector ###
+# Number of records written to HDFS before invoking file commits.
+flush.size=${FLUSH_SIZE}
+# The time interval in milliseconds to invoke file commits. This configuration ensures that file commits are invoked every configured interval.
+# This configuration is useful when data ingestion rate is low and the connector didn’t write enough messages to commit files.
+# The default value -1 means that this feature is disabled.
+rotate.interval.ms=${ROTATE_INTERVAL}
+# The time interval in milliseconds to periodically invoke file commits. This configuration ensures that file commits are invoked every configured interval.
+# Time of commit will be adjusted to 00:00 of selected timezone. Commit will be performed at scheduled time regardless previous commit time or number of messages.
+# This configuration is useful when you have to commit your data based on current server time, like at the beginning of every hour.
+# The default value -1 means that this feature is disabled.
+rotate.schedule.interval.ms=${ROTATE_SCHEDULE_INTERVAL}
+# The retry backoff in milliseconds. This config is used to notify Kafka connect to retry delivering a message batch or performing recovery in case of transient exceptions.
+retry.backoff.ms=${RETRY_BACKOFF}
+# Clean shutdown timeout. This makes sure that asynchronous Hive metastore updates are completed during connector shutdown.
+shutdown.timeout.ms=${SHUTDOWN_TIMEOUT}
+# The partitioner to use when writing data to HDFS. You can use DefaultPartitioner, which preserves the Kafka partitions;
+# FieldPartitioner, which partitions the data to different directories according to the value of the partitioning field specified in partition.field.name;
+# TimebasedPartitioner, which partitions data according to the time ingested to HDFS.
+partitioner.class=${PARTITIONER}
+# The name of the partitioning field when FieldPartitioner is used.
+partition.field.name=${PARTITION_FIELD}
+# The duration of a partition milliseconds used by TimeBasedPartitioner. The default value -1 means that we are not using TimebasedPartitioner.
+partition.duration.ms=${PARTITION_DURATION}
+# This configuration is used to set the format of the data directories when partitioning with TimeBasedPartitioner.
+# The format set in this configuration converts the Unix timestamp to proper directories strings.
+# For example, if you set path.format='year'=YYYY/'month'=MM/'day'=dd/'hour'=HH/, the data directories will have the format /year=2015/month=12/day=07/hour=15.
+path.format=${PARTITION_FORMAT}
+# The locale to use when partitioning with TimeBasedPartitioner.
+locale=${LOCALE}
+# The timezone to use when partitioning with TimeBasedPartitioner.
+timezone=${TIMEZONE}
+# Width to zero pad offsets in HDFS filenames to if the offsets is too short in order to provide fixed width filenames that can be ordered by simple lexicographic sorting.
+filename.offset.zero.pad.width=${FILENAME_ZERO_PAD}
+
+### Internal ###
+# The underlying storage layer. The default is HDFS.
+storage.class=io.confluent.connect.hdfs.storage.HdfsStorage
