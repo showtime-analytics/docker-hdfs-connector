@@ -47,9 +47,4 @@ export FILENAME_ZERO_PAD=${FILENAME_ZERO_PAD:="10"}
 envsubst < /opt/docker/conf/connect-avro.template > /opt/docker/conf/connect-avro.properties
 envsubst < /opt/docker/conf/hdfs-sink.template > /opt/docker/conf/hdfs-sink.properties
 
-# If kerberos authentication is enabled, we need to load the krb configuration (and delete the default one)
-#if [[ "$KERBEROS_AUTH" == "true" ]]; then
-#  rm /etc/krb5.conf
-#fi
-
 exec "$@"
