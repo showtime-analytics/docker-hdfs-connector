@@ -19,7 +19,7 @@ export HDFS_LOGS_PATH=${HDFS_LOGS_PATH:="/logs"}
 
 export HIVE_INTEGRATION=${HIVE_INTEGRATION:="false"}
 export HIVE_HOST=${HIVE_HOST:="hive"}
-export HIVE_PORT=${HIVE_HOST:="9083"}
+export HIVE_PORT=${HIVE_PORT:="9083"}
 export HIVE_SERVICE=${HIVE_SERVICE:="thrift://$HIVE_HOST:$HIVE_PORT"}
 export HIVE_DATABASE=${HIVE_DATABASE:="database"}
 
@@ -32,20 +32,15 @@ export KERBEROS_KEYTAB=${KERBEROS_KEYTAB:="/opt/docker/auth/principal.keytab"}
 export KERBEROS_HDFS_PRINCIPAL=${KERBEROS_HDFS_PRINCIPAL:="hdfs/nameservice1@EXAMPLE.COM"}
 export KERBEROS_TICKET_RENEW=${KERBEROS_TICKET_RENEW:="3600000"}
 
-export FLUSH_SIZE=${FLUSH_SIZE:="1000"}
+export FLUSH_SIZE=${FLUSH_SIZE:="10000"}
 export ROTATE_INTERVAL=${ROTATE_INTERVAL:="-1"}
-export ROTATE_SCHEDULE_INTERVAL=${ROTATE_SCHEDULE_INTERVAL:="60000"}
+export ROTATE_SCHEDULE_INTERVAL=${ROTATE_SCHEDULE_INTERVAL:="600000"}
 export RETRY_BACKOFF=${RETRY_BACKOFF:="10000"}
 export SHUTDOWN_TIMEOUT=${SHUTDOWN_TIMEOUT:="3000"}
 export PARTITIONER=${PARTITIONER:="io.confluent.connect.hdfs.partitioner.TimeBasedPartitioner"}
 export PARTITION_FIELD=${PARTITION_FIELD:="id"}
-export PARTITION_DURATION=${PARTITION_DURATION:="60000"}
+export PARTITION_DURATION=${PARTITION_DURATION:="600000"}
 export PARTITION_FORMAT=${PARTITION_FORMAT:="YYYY/MM/dd/HH/"}
 export LOCALE=${LOCALE:="en"}
 export TIMEZONE=${TIMEZONE:="UTC"}
 export FILENAME_ZERO_PAD=${FILENAME_ZERO_PAD:="10"}
-
-envsubst < /opt/docker/conf/connect-avro.template > /opt/docker/conf/connect-avro.properties
-envsubst < /opt/docker/conf/hdfs-sink.template > /opt/docker/conf/hdfs-sink.properties
-
-exec "$@"

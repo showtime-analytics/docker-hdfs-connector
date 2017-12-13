@@ -1,0 +1,31 @@
+#!/usr/bin/with-contenv bash
+
+set -e
+
+function log {
+  echo `date` $ME - $@
+}
+
+function checkNetwork {
+  log "[ Checking container ip... ]"
+  a="`ip a s dev eth0 &> /dev/null; echo $?`"
+  while  [ $a -eq 1 ];
+  do
+    a="`ip a s dev eth0 &> /dev/null; echo $?`"
+    sleep 1
+  done
+
+  log "[ Checking container connectivity... ]"
+  b="`ping -c 1 rancher-metadata. &> /dev/null; echo $?`"
+  while [ $b -eq 1 ];
+  do
+    b="`ping -c 1 rancher-metadata. &> /dev/null; echo $?`"
+    sleep 1
+  done
+}
+
+#checkNetwork
+
+log "[ Running /confd ... ]"
+#exec ${CONFD_HOME}/bin/confd -confdir ${CONFD_HOME}/etc -interval 30 -backend rancher -prefix /latest
+exec ${CONFD_HOME}/bin/confd -confdir ${CONFD_HOME}/etc -interval 30 -backend env

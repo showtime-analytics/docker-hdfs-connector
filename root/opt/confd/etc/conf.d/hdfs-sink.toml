@@ -1,0 +1,5 @@
+[template]
+src = "hdfs-sink.tmpl"
+dest = "/opt/docker/conf/hdfs-sink.properties"
+owner = "root"
+mode = "0644"
