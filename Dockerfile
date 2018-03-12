@@ -1,7 +1,7 @@
 FROM showtimeanalytics/alpine-java:8u131b11_jdk_unlimited
 MAINTAINER Miguel Alonso <miguel@showtimeanalytics.com>
 
-LABEL confluent.version="3.3.1" \
+LABEL confluent.version="4.0.0" \
       description="Kafka Connect is a framework for scalably and reliably streaming data between Apache Kafka and other data systems." \
       maintainer="Miguel Alonso <miguel@showtimeanalytics.com>"
 
@@ -11,8 +11,8 @@ ARG S6_OVERLAY_URL=https://github.com/just-containers/s6-overlay/releases/downlo
 ARG CONFD_VERSION=0.14.0
 ARG CONFD_URL=https://github.com/kelseyhightower/confd/releases/download
 
-ARG CONFLUENT_VERSION=3.3
-ARG CONFLUENT_VERSION_MINOR=1
+ARG CONFLUENT_VERSION=4.0
+ARG CONFLUENT_VERSION_MINOR=0
 ARG CONFLUENT_BASE_URL=http://packages.confluent.io/archive/${CONFLUENT_VERSION}
 
 ENV CONFD_HOME=/opt/confd

@@ -1,11 +1,11 @@
-name={{ getenv "SERVICE_NAME" "hdfs-connector" }}
+name={{ getenv "SERVICE_NAME" "hdfs" }}-connector
 connector.class=io.confluent.connect.hdfs.HdfsSinkConnector
 tasks.max={{ getenv "TASKS" "1" }}
-topics={{ getenv "TOPICS" "test" }}
+topics={{ getenv "TOPICS" "test_hdfs" }}
 
 ### HDFS ###
 # The HDFS connection URL. This configuration has the format of hdfs:://hostname:port and specifies the HDFS to export data to.
-hdfs.url={{ getenv "HDFS_SERVICE" "hdfs://nameservice1" }}
+hdfs.url={{ getenv "HDFS_SERVICE" "nameservice1" }}
 # The Hadoop configuration directory.
 hadoop.conf.dir=/opt/docker/conf/hadoop-conf
 # Top level HDFS directory to store the data ingested from Kafka.

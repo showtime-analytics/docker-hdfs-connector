@@ -1,9 +1,18 @@
-# Sample configuration for a standalone Kafka Connect worker that uses Avro serialization and
-# integrates the the Schema Registry. This sample configuration assumes a local installation of
-# Confluent Platform with all services running on their default ports.
+# Sample configuration for a distributed Kafka Connect worker that uses Avro serialization and
+# integrates the the Schema Registry.
+
+# Unique name for the cluster, used in forming the Connect cluster group. Note that this must not conflict with consumer group IDs
+group.id=connect-cluster-{{ getenv "SERVICE_NAME" "hdfs" }}
 
 # Bootstrap Kafka servers. If multiple servers are specified, they should be comma-separated.
+{{- if getenv "KAFKA_LINK" }}
+{{- $kafka_link := split (getenv "KAFKA_LINK") "/" }}
+{{- $kafka_stack := index $kafka_link 0 }}
+{{- $kafka_service := index $kafka_link 1}}
+bootstrap.servers={{- range $i, $e := lsdir (printf "/stacks/%s/services/%s/containers" $kafka_stack $kafka_service) -}}{{- if $i -}},{{- end -}}{{- getv (printf "/stacks/%s/services/%s/containers/%s/name" $kafka_stack $kafka_service $e) -}}:{{ getenv "KAFKA_PORT" "9092" }}{{- end -}}
+{{- else}}
 bootstrap.servers={{ getenv "KAFKA_HOST" "kafka" }}:{{ getenv "KAFKA_PORT" "9092" }}
+{{- end }}
 
 # The converters specify the format of data in Kafka and how to translate it into Connect data.
 # Every Connect user will need to configure these based on the format they want their data in
@@ -13,6 +22,11 @@ key.converter.schema.registry.url=http://{{ getenv "SCHEMA_REGISTRY_HOST" "schem
 value.converter=io.confluent.connect.avro.AvroConverter
 value.converter.schema.registry.url=http://{{ getenv "SCHEMA_REGISTRY_HOST" "schema-registry" }}:{{ getenv "SCHEMA_REGISTRY_HOST" "8081" }}
 
+# Converter-specific settings can be passed in by prefixing the Converter's setting with the converter we want to apply
+# it to
+key.converter.schemas.enable=true
+value.converter.schemas.enable=true
+
 # The internal converter used for offsets and config data is configurable and must be specified,
 # but most users will always want to use the built-in default. Offset and config data is never
 # visible outside of Connect in this format.
@@ -21,10 +35,42 @@ internal.value.converter=org.apache.kafka.connect.json.JsonConverter
 internal.key.converter.schemas.enable=false
 internal.value.converter.schemas.enable=false
 
-# Local storage file for offset data
-offset.storage.file.filename=/opt/docker/offsets/{{ getenv "SERVICE_NAME" "hdfs-connector" }}.offsets
+# Topic to use for storing offsets. This topic should have many partitions and be replicated and compacted.
+# Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
+# the topic before starting Kafka Connect if a specific topic configuration is needed.
+offset.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-offsets
+offset.storage.replication.factor={{ getenv "REPLICATION" "3" }}
+offset.storage.partitions={{ getenv "OFFSET_STORAGE_PARTITIONS" "25" }}
 
-# Confuent Control Center Integration -- uncomment these lines to enable Kafka client interceptors
-# that will report audit data that can be displayed and analyzed in Confluent Control Center
-# producer.interceptor.classes=io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
-# consumer.interceptor.classes=io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
+# Topic to use for storing connector and task configurations; note that this should be a single partition, highly replicated,
+# and compacted topic. Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
+# the topic before starting Kafka Connect if a specific topic configuration is needed.
+config.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-configs
+config.storage.replication.factor={{ getenv "REPLICATION" "3" }}
+
+# Topic to use for storing statuses. This topic can have multiple partitions and should be replicated and compacted.
+# Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
+# the topic before starting Kafka Connect if a specific topic configuration is needed.
+# to run this example on a single-broker cluster and so here we instead set the replication factor to 1.
+status.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-status
+status.storage.replication.factor={{ getenv "REPLICATION" "3" }}
+status.storage.partitions={{ getenv "STATUS_STORAGE_PARTITIONS" "5" }}
+
+# These are provided to inform the user about the presence of the REST host and port configs
+# Hostname & Port for the REST API to listen on. If this is set, it will bind to the interface used to listen to requests.
+#rest.host.name=
+#rest.port=8083
+
+# The Hostname & Port that will be given out to other workers to connect to i.e. URLs that are routable from other servers.
+#rest.advertised.host.name=
+#rest.advertised.port=
+
+# Set to a list of filesystem paths separated by commas (,) to enable class loading isolation for plugins
+# (connectors, converters, transformations). The list should consist of top level directories that include
+# any combination of:
+# a) directories immediately containing jars with plugins and their dependencies
+# b) uber-jars with plugins and their dependencies
+# c) directories immediately containing the package directory structure of classes of plugins and their dependencies
+# Examples:
+# plugin.path=/usr/local/share/java,/usr/local/share/kafka/plugins,/opt/connectors,
+#plugin.path=
