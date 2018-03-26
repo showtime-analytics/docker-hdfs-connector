@@ -18,9 +18,9 @@ bootstrap.servers={{ getenv "KAFKA_HOST" "kafka" }}:{{ getenv "KAFKA_PORT" "9092
 # Every Connect user will need to configure these based on the format they want their data in
 # when loaded from or stored into Kafka
 key.converter=io.confluent.connect.avro.AvroConverter
-key.converter.schema.registry.url=http://{{ getenv "SCHEMA_REGISTRY_HOST" "schema-registry" }}:{{ getenv "SCHEMA_REGISTRY_HOST" "8081" }}
+key.converter.schema.registry.url=http://{{ getenv "SCHEMA_REGISTRY_HOST" "schema-registry" }}:{{ getenv "SCHEMA_REGISTRY_PORT" "8081" }}
 value.converter=io.confluent.connect.avro.AvroConverter
-value.converter.schema.registry.url=http://{{ getenv "SCHEMA_REGISTRY_HOST" "schema-registry" }}:{{ getenv "SCHEMA_REGISTRY_HOST" "8081" }}
+value.converter.schema.registry.url=http://{{ getenv "SCHEMA_REGISTRY_HOST" "schema-registry" }}:{{ getenv "SCHEMA_REGISTRY_PORT" "8081" }}
 
 # Converter-specific settings can be passed in by prefixing the Converter's setting with the converter we want to apply
 # it to
@@ -73,4 +73,4 @@ status.storage.partitions={{ getenv "STATUS_STORAGE_PARTITIONS" "5" }}
 # c) directories immediately containing the package directory structure of classes of plugins and their dependencies
 # Examples:
 # plugin.path=/usr/local/share/java,/usr/local/share/kafka/plugins,/opt/connectors,
-#plugin.path=
+plugin.path={{ getenv "SERVICE_HOME" "/opt/docker" }}/share/java

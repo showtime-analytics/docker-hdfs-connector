@@ -1,1 +1,3 @@
+/etc/crontabs/root                  false root 0600 0600
+/etc/periodic/5min/connector-load   false root 0770 0770
 /etc/periodic/15min/connector-check false root 0770 0770
