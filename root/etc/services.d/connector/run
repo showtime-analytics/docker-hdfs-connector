@@ -7,7 +7,6 @@ function log {
 }
 
 function run_connector {
-#  exec su-exec ${SERVICE_USER} ${SERVICE_HOME}/bin/connect-standalone ${SERVICE_HOME}/conf/connect-avro.properties ${SERVICE_HOME}/conf/hdfs-sink.properties
   exec ${SERVICE_HOME}/bin/connect-distributed ${SERVICE_HOME}/conf/connect-avro.properties
 }
 

@@ -1,3 +1,0 @@
-#!/bin/bash
-
-${SERVICE_HOME}/bin/confluent load ${SERVICE_NAME}-connector -d ${SERVICE_HOME}/conf/hdfs-sink.properties
