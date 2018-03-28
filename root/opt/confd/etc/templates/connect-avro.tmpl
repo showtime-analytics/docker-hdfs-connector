@@ -6,7 +6,7 @@ group.id=connect-cluster-{{ getenv "SERVICE_NAME" "hdfs" }}
 
 # Bootstrap Kafka servers. If multiple servers are specified, they should be comma-separated.
 {{- if getenv "KAFKA_LINK" }}
-{{- $kafka_link := split (getenv "KAFKA_LINK") "/" }}
+{{- $kafka_link := split (getenv "KAFKA_LINK" "kafka/kafka") "/" }}
 {{- $kafka_stack := index $kafka_link 0 }}
 {{- $kafka_service := index $kafka_link 1}}
 bootstrap.servers={{range $i, $e := lsdir (printf "/stacks/%s/services/%s/containers" $kafka_stack $kafka_service)}}{{if $i}},{{end}}{{getv (printf "/stacks/%s/services/%s/containers/%s/name" $kafka_stack $kafka_service $e)}}:{{getenv "KAFKA_PORT" "9092"}}{{end}}
