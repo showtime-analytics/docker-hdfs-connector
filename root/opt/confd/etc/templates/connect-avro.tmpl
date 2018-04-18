@@ -2,7 +2,7 @@
 # integrates the the Schema Registry.
 
 # Unique name for the cluster, used in forming the Connect cluster group. Note that this must not conflict with consumer group IDs
-group.id=connect-cluster-{{ getenv "SERVICE_NAME" "hdfs" }}
+group.id=connect-{{ getenv "CONNECTOR_TYPE" "cluster" }}-{{ getenv "SERVICE_NAME" "hdfs" }}
 
 # Bootstrap Kafka servers. If multiple servers are specified, they should be comma-separated.
 {{- if getenv "KAFKA_LINK" }}
@@ -13,6 +13,9 @@ bootstrap.servers={{range $i, $e := lsdir (printf "/stacks/%s/services/%s/contai
 {{- else}}
 bootstrap.servers={{ getenv "KAFKA_HOST" "kafka" }}:{{ getenv "KAFKA_PORT" "9092" }}
 {{- end }}
+
+# File to store the offsets when using standalone
+#offset.storage.file.filename={{ getenv "SERVICE_HOME" "/opt/docker" }}/offsets/offset.txt
 
 # The converters specify the format of data in Kafka and how to translate it into Connect data.
 # Every Connect user will need to configure these based on the format they want their data in
@@ -73,4 +76,4 @@ status.storage.partitions={{ getenv "STATUS_STORAGE_PARTITIONS" "5" }}
 # c) directories immediately containing the package directory structure of classes of plugins and their dependencies
 # Examples:
 # plugin.path=/usr/local/share/java,/usr/local/share/kafka/plugins,/opt/connectors,
-plugin.path={{ getenv "SERVICE_HOME" "/opt/docker" }}/share/java
+plugin.path={{ getenv "SERVICE_HOME" "/opt/docker" }}/share/java/kafka-connect-hdfs

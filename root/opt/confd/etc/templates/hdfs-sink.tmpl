@@ -1,4 +1,4 @@
-name={{ getenv "SERVICE_NAME" "hdfs" }}-connector
+name={{ getenv "SERVICE_NAME" "hdfs" }}
 connector.class=io.confluent.connect.hdfs.HdfsSinkConnector
 tasks.max={{ getenv "TASKS" "1" }}
 topics={{ getenv "TOPICS" "test_hdfs" }}

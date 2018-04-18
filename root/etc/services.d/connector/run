@@ -7,7 +7,11 @@ function log {
 }
 
 function run_connector {
-  exec ${SERVICE_HOME}/bin/connect-distributed ${SERVICE_HOME}/conf/connect-avro.properties
+  if [ "$CONNECTOR_TYPE" == "cluster" ]; then
+    exec ${SERVICE_HOME}/bin/connect-distributed ${SERVICE_HOME}/conf/connect-avro.properties
+  else
+    exec ${SERVICE_HOME}/bin/connect-standalone ${SERVICE_HOME}/conf/connect-avro.properties ${SERVICE_HOME}/conf/hdfs-sink.properties
+  fi
 }
 
 while [ ! -f "${SERVICE_HOME}/conf/connect-avro.properties" ]; do
