@@ -24,8 +24,8 @@ function checkNetwork {
   done
 }
 
-#checkNetwork
+checkNetwork
 
 log "[ Running /confd ... ]"
-#exec ${CONFD_HOME}/bin/confd -confdir ${CONFD_HOME}/etc -interval 30 -backend rancher -prefix /latest
-exec ${CONFD_HOME}/bin/confd -confdir ${CONFD_HOME}/etc -interval 30 -backend env
+exec ${CONFD_HOME}/bin/confd -confdir ${CONFD_HOME}/etc -interval 30 -backend rancher -prefix /latest
+#exec ${CONFD_HOME}/bin/confd -confdir ${CONFD_HOME}/etc -interval 30 -backend env

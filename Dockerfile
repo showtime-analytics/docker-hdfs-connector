@@ -19,7 +19,7 @@ ENV CONFD_HOME=/opt/confd
 ENV SERVICE_HOME=/opt/docker
 
 RUN set -ex \
- && apk --update add curl gettext su-exec \
+ && apk --update add curl gettext su-exec jq file \
  && echo  "====> Install s6 overlay" \
  && curl -sL ${S6_OVERLAY_URL}/${S6_OVERLAY_VERSION}/s6-overlay-amd64.tar.gz \
     | tar -zx -C / \
@@ -33,7 +33,6 @@ RUN set -ex \
  && mkdir -p /opt/docker/offsets /opt/docker/auth \
  && curl -fsSL -o /tmp/confluent.tar.gz ${CONFLUENT_BASE_URL}/confluent-oss-${CONFLUENT_VERSION}.${CONFLUENT_VERSION_MINOR}-2.11.tar.gz \
  && tar -xzf /tmp/confluent.tar.gz -C /opt/docker --strip-components=1 \
- && ln -s /opt/docker/bin/connect-standalone /usr/bin/connect-standalone \
  && mkdir -p /opt/docker/conf/hadoop-conf /opt/docker/conf/hive-conf \
  \
  && echo "===> Add group, user and grant permissions" \

@@ -1,0 +1,23 @@
+#!/usr/bin/with-contenv bash
+
+set -e
+
+function log {
+  echo `date` $ME - $@
+}
+
+function run_connector {
+  if [ "$WORKER_TYPE" == "distributed" ]; then
+    exec ${SERVICE_HOME}/bin/connect-distributed ${SERVICE_HOME}/conf/connect-avro.properties
+  else
+    exec ${SERVICE_HOME}/bin/connect-standalone ${SERVICE_HOME}/conf/connect-avro.properties ${SERVICE_HOME}/conf/hdfs-sink.properties
+  fi
+}
+
+while [ ! -f "${SERVICE_HOME}/conf/connect-avro.properties" ]; do
+  log "[ Waiting for configuration ... ]"
+  sleep 1
+done
+
+log "[ Running Kafka Connector ... ]"
+run_connector

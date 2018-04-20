@@ -1,0 +1,30 @@
+#!/usr/bin/with-contenv bash
+
+set -e
+
+function log {
+  echo `date` $ME - $@
+}
+
+function check_connector {
+  log "[ Waiting for connector ... ]"
+  sleep 10
+  status=$(curl -fsSL localhost:8083/connectors &> /dev/null; echo $?)
+}
+
+function add_sink {
+  check_connector
+  until [ $status -eq 0 ]; do
+    check_connector
+  done
+
+  log "[ Adding task configuration to connector ]"
+  ${SERVICE_HOME}/bin/confluent load ${SERVICE_NAME}-connector -d ${SERVICE_HOME}/conf/hdfs-sink.properties
+}
+
+if [ "$WORKER_TYPE" == "distributed" ]; then
+  add_sink &
+  disown
+else
+  exit 0
+fi

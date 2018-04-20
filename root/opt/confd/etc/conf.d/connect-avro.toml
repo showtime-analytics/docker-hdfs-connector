@@ -3,3 +3,6 @@ src = "connect-avro.tmpl"
 dest = "/opt/docker/conf/connect-avro.properties"
 owner = "root"
 mode = "0644"
+keys = [
+  "/stacks"
+]

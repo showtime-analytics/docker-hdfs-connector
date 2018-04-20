@@ -4,5 +4,4 @@
 touch /etc/crontab /etc/cron.*/*
 
 echo "running services.d/cron"
-
 exec crond -f

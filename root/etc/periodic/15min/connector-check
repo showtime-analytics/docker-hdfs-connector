@@ -1,6 +1,6 @@
 #!/bin/bash
 
-status=$(curl -fsSL localhost:8083/connectors/${SERVICE_NAME}/tasks/0/status)
+status=$(curl -fsSL localhost:8083/connectors/${SERVICE_NAME}-connector/tasks/0/status)
 
 if [[ $? -ne 0 || $status != *"RUNNING"* ]]; then
   s6-svscanctl -t /var/run/s6/services
