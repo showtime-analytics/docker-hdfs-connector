@@ -1,16 +1,24 @@
+# Basics #######################################################################
+
 name={{ getenv "SERVICE_NAME" "hdfs" }}
 connector.class=io.confluent.connect.hdfs.HdfsSinkConnector
 tasks.max={{ getenv "TASKS" "1" }}
+{{- with $topicsAsRegex := getenv "TOPICS_AS_REGEX"}}
+{{- if eq "false" $topicsAsRegex }}
 topics={{ getenv "TOPICS" "test_hdfs" }}
+{{- else }}
+topics.regex={{ getenv "TOPICS" }}
+{{- end}}
+{{- end}}
+
+# HDFS #########################################################################
 
 hdfs.url={{ getenv "HDFS_SERVICE" "hdfs://nameservice1" }}
 hadoop.conf.dir=/opt/docker/conf/hadoop-conf
-topics.dir={{ getenv "HDFS_PATH" "/data" }}
+{{- if getenv "HADOOP_HOME" }}hadoop.home={{ getenv "HADOOP_HOME" }}{{- end}}
 logs.dir={{ getenv "HDFS_LOGS_PATH" "/logs" }}
-format.class=io.confluent.connect.hdfs.avro.AvroFormat
-storage.class=io.confluent.connect.hdfs.storage.HdfsStorage
 
-hive.integration={{ getenv "HIVE_INTEGRATION" "false" }}
+# Security #####################################################################
 
 hdfs.authentication.kerberos={{ getenv "KERBEROS_AUTH" "false" }}
 connect.hdfs.principal={{ getenv "KERBEROS_PRINCIPAL" "principal@EXAMPLE.COM" }}
@@ -18,14 +26,26 @@ connect.hdfs.keytab={{ getenv "KERBEROS_KEYTAB" "/opt/docker/auth/principal.keyt
 hdfs.namenode.principal={{ getenv "KERBEROS_HDFS_PRINCIPAL" "hdfs/nameservice1@EXAMPLE.COM" }}
 kerberos.ticket.renew.period.ms={{ getenv "KERBEROS_TICKET_RENEW" "3600000" }}
 
-schema.compatibility={{ getenv "SCHEMA_COMPAT" "BACKWARD" }}
-schema.cache.size={{ getenv "SCHEMA_CACHE" "1000" }}
+# Connector ####################################################################
 
+format.class=io.confluent.connect.hdfs.avro.AvroFormat
 flush.size={{ getenv "FLUSH_SIZE" "10000" }}
 rotate.interval.ms={{ getenv "ROTATE_INTERVAL" "-1" }}
 rotate.schedule.interval.ms={{ getenv "ROTATE_SCHEDULE_INTERVAL" "600000" }}
+schema.cache.size={{ getenv "SCHEMA_CACHE" "1000" }}
 retry.backoff.ms={{ getenv "RETRY_BACKOFF" "10000" }}
 shutdown.timeout.ms={{ getenv "SHUTDOWN_TIMEOUT" "3000" }}
+filename.offset.zero.pad.width={{ getenv "FILENAME_ZERO_PAD" "10" }}
+
+# Storage ######################################################################
+
+storage.class=io.confluent.connect.hdfs.storage.HdfsStorage
+topics.dir={{ getenv "HDFS_PATH" "/data" }}
+{{- if getenv "STORE_URL" }}store.url={{ getenv "STORE_URL" }}{{- end}}
+directory.delim={{ getenv "DIRECTORY_DELIM" "/" }}
+file.delim={{ getenv "FILE_DELIM" "+" }}
+
+# Partitioner ##################################################################
 
 partitioner.class={{ getenv "PARTITIONER" "io.confluent.connect.hdfs.partitioner.TimeBasedPartitioner" }}
 partition.field.name={{ getenv "PARTITION_FIELD" "id" }}
@@ -33,5 +53,21 @@ partition.duration.ms={{ getenv "PARTITION_DURATION" "600000" }}
 path.format={{ getenv "PARTITION_FORMAT" "YYYY/MM/dd/HH/" }}
 locale={{ getenv "LOCALE" "en" }}
 timezone={{ getenv "TIMEZONE" "UTC" }}
-filename.offset.zero.pad.width={{ getenv "FILENAME_ZERO_PAD" "10" }}
-timestamp.extractor=Record
+timestamp.extractor={{ getenv "TIMESTAMP_EXTRACTOR" "Record" }}
+{{- if getenv "TIMESTAMP_FIELD" }}timestamp.field={{ getenv "TIMESTAMP_FIELD" }}{{- end}}
+
+# Hive #########################################################################
+
+hive.integration={{ getenv "HIVE_INTEGRATION" "false" }}
+{{- with $hiveIntegration := getenv "HIVE_INTEGRATION"}}
+{{- if eq "true" $hiveIntegration }}
+hive.metastore.uris={{ getenv "HIVE_METASTORE_URIS" }}
+hive.conf.dir={{ getenv "HIVE_CONF_DIR" }}
+hive.home={{ getenv "HIVE_HOME" }}
+hive.database={{ getenv "HIVE_DATABASE" }}
+{{- end}}
+{{- end}}
+
+# Schema #######################################################################
+
+schema.compatibility={{ getenv "SCHEMA_COMPAT" "BACKWARD" }}

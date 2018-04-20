@@ -7,7 +7,7 @@ function log {
 }
 
 function run_connector {
-  if [ "$CONNECTOR_TYPE" == "cluster" ]; then
+  if [ "$WORKER_TYPE" == "distributed" ]; then
     exec ${SERVICE_HOME}/bin/connect-distributed ${SERVICE_HOME}/conf/connect-avro.properties
   else
     exec ${SERVICE_HOME}/bin/connect-standalone ${SERVICE_HOME}/conf/connect-avro.properties ${SERVICE_HOME}/conf/hdfs-sink.properties

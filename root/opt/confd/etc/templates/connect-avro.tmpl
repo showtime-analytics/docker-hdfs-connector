@@ -1,8 +1,7 @@
-# Sample configuration for a distributed Kafka Connect worker that uses Avro serialization and
+# Sample configuration for a Kafka Connect worker that uses Avro serialization and
 # integrates the the Schema Registry.
 
-# Unique name for the cluster, used in forming the Connect cluster group. Note that this must not conflict with consumer group IDs
-group.id=connect-{{ getenv "CONNECTOR_TYPE" "cluster" }}-{{ getenv "SERVICE_NAME" "hdfs" }}
+# Common Worker Configs ########################################################
 
 # Bootstrap Kafka servers. If multiple servers are specified, they should be comma-separated.
 {{- if getenv "KAFKA_LINK" }}
@@ -13,9 +12,6 @@ bootstrap.servers={{range $i, $e := lsdir (printf "/stacks/%s/services/%s/contai
 {{- else}}
 bootstrap.servers={{ getenv "KAFKA_HOST" "kafka" }}:{{ getenv "KAFKA_PORT" "9092" }}
 {{- end }}
-
-# File to store the offsets when using standalone
-#offset.storage.file.filename={{ getenv "SERVICE_HOME" "/opt/docker" }}/offsets/offset.txt
 
 # The converters specify the format of data in Kafka and how to translate it into Connect data.
 # Every Connect user will need to configure these based on the format they want their data in
@@ -38,31 +34,12 @@ internal.value.converter=org.apache.kafka.connect.json.JsonConverter
 internal.key.converter.schemas.enable=false
 internal.value.converter.schemas.enable=false
 
-# Topic to use for storing offsets. This topic should have many partitions and be replicated and compacted.
-# Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
-# the topic before starting Kafka Connect if a specific topic configuration is needed.
-offset.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-offsets
-offset.storage.replication.factor={{ getenv "REPLICATION" "3" }}
-offset.storage.partitions={{ getenv "OFFSET_STORAGE_PARTITIONS" "25" }}
-
-# Topic to use for storing connector and task configurations; note that this should be a single partition, highly replicated,
-# and compacted topic. Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
-# the topic before starting Kafka Connect if a specific topic configuration is needed.
-config.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-configs
-config.storage.replication.factor={{ getenv "REPLICATION" "3" }}
-
-# Topic to use for storing statuses. This topic can have multiple partitions and should be replicated and compacted.
-# Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
-# the topic before starting Kafka Connect if a specific topic configuration is needed.
-# to run this example on a single-broker cluster and so here we instead set the replication factor to 1.
-status.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-status
-status.storage.replication.factor={{ getenv "REPLICATION" "3" }}
-status.storage.partitions={{ getenv "STATUS_STORAGE_PARTITIONS" "5" }}
-
 # These are provided to inform the user about the presence of the REST host and port configs
 # Hostname & Port for the REST API to listen on. If this is set, it will bind to the interface used to listen to requests.
-#rest.host.name=
-#rest.port=8083
+{{- if getenv "REST_HOST_NAME" }}
+rest.host.name={{ getenv "REST_HOST_NAME" }}
+{{- end }}
+rest.port=8083
 
 # The Hostname & Port that will be given out to other workers to connect to i.e. URLs that are routable from other servers.
 #rest.advertised.host.name=
@@ -76,4 +53,43 @@ status.storage.partitions={{ getenv "STATUS_STORAGE_PARTITIONS" "5" }}
 # c) directories immediately containing the package directory structure of classes of plugins and their dependencies
 # Examples:
 # plugin.path=/usr/local/share/java,/usr/local/share/kafka/plugins,/opt/connectors,
-plugin.path={{ getenv "SERVICE_HOME" "/opt/docker" }}/share/java/kafka-connect-hdfs
+plugin.path={{ getenv "SERVICE_HOME" "/opt/docker" }}/share/java{{ getenv "PLUGIN_DIRECTORY" "" }}
+
+{{- with $connectorType := getenv "WORKER_TYPE"}}
+{{- if eq "standalone" $connectorType }}
+# Standalone Worker Configs ####################################################
+
+# File to store the offsets when using standalone
+offset.storage.file.filename={{ getenv "SERVICE_HOME" "/opt/docker" }}/offsets/offset.txt
+{{- end }}
+{{- end }}
+
+{{- with $connectorType := getenv "WORKER_TYPE"}}
+{{- if eq "distributed" $connectorType }}
+# Distributed Worker Configs ###################################################
+
+# Unique name for the cluster, used in forming the Connect cluster group. Note that this must not conflict with consumer group IDs
+group.id=connect-{{ getenv "SERVICE_NAME" "hdfs" }}
+
+# Topic to use for storing connector and task configurations; note that this should be a single partition, highly replicated,
+# and compacted topic. Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
+# the topic before starting Kafka Connect if a specific topic configuration is needed.
+config.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-configs
+config.storage.replication.factor={{ getenv "REPLICATION" "3" }}
+
+# Topic to use for storing offsets. This topic should have many partitions and be replicated and compacted.
+# Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
+# the topic before starting Kafka Connect if a specific topic configuration is needed.
+offset.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-offsets
+offset.storage.replication.factor={{ getenv "REPLICATION" "3" }}
+offset.storage.partitions={{ getenv "OFFSET_STORAGE_PARTITIONS" "25" }}
+
+# Topic to use for storing statuses. This topic can have multiple partitions and should be replicated and compacted.
+# Kafka Connect will attempt to create the topic automatically when needed, but you can always manually create
+# the topic before starting Kafka Connect if a specific topic configuration is needed.
+# to run this example on a single-broker cluster and so here we instead set the replication factor to 1.
+status.storage.topic=connect-{{ getenv "SERVICE_NAME" "hdfs" }}-status
+status.storage.replication.factor={{ getenv "REPLICATION" "3" }}
+status.storage.partitions={{ getenv "STATUS_STORAGE_PARTITIONS" "5" }}
+{{- end }}
+{{- end }}
