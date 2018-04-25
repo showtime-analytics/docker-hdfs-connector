@@ -93,3 +93,9 @@ status.storage.replication.factor={{ getenv "REPLICATION" "3" }}
 status.storage.partitions={{ getenv "STATUS_STORAGE_PARTITIONS" "5" }}
 {{- end }}
 {{- end }}
+
+# Kafka Consumer Configs ###################################################
+
+{{range split (getenv "CONSUMER_PROPERTIES") ";"}}
+{{.}}
+{{end}}
